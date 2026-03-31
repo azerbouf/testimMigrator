@@ -584,9 +584,66 @@ const html = `<!DOCTYPE html>
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+  /* ── LOGIN OVERLAY ── */
+  #login-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0f172a;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-card {
+    background: #1e293b; border-radius: 20px; padding: 48px 44px;
+    width: 380px; box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    display: flex; flex-direction: column; align-items: center; gap: 28px;
+  }
+  #login-logo {
+    width: 56px; height: 56px; background: var(--orange); border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-logo svg { width: 28px; height: 28px; fill: white; }
+  #login-title { font-size: 22px; font-weight: 700; color: #f1f5f9; text-align: center; line-height: 1.3; }
+  #login-sub { font-size: 14px; color: #64748b; text-align: center; margin-top: -16px; }
+  #login-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+  .login-field {
+    width: 100%; padding: 12px 16px; border-radius: 10px;
+    border: 1.5px solid #334155; background: #0f172a;
+    font-size: 15px; color: #f1f5f9; outline: none; transition: border-color .15s;
+  }
+  .login-field::placeholder { color: #475569; }
+  .login-field:focus { border-color: var(--orange); }
+  #login-btn {
+    width: 100%; padding: 13px; border-radius: 10px; border: none;
+    background: var(--orange); color: white; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background .15s; margin-top: 4px;
+  }
+  #login-btn:hover { background: var(--orange2); }
+  #login-error {
+    font-size: 13px; color: #f87171; text-align: center;
+    background: rgba(239,68,68,.1); border-radius: 8px; padding: 10px 14px;
+    display: none;
+  }
 </style>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div id="login-card">
+    <div id="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div>
+      <div id="login-title">Testim Migrator</div>
+      <div id="login-sub">Playwright Bridge</div>
+    </div>
+    <form id="login-form" onsubmit="return doLogin(event)">
+      <input class="login-field" id="login-user" type="text" placeholder="Username" autocomplete="username" autofocus>
+      <input class="login-field" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <div id="login-error">Incorrect username or password.</div>
+      <button id="login-btn" type="submit">Sign in</button>
+    </form>
+  </div>
+</div>
 
 <!-- TOP HEADER -->
 <div id="topbar">
@@ -698,6 +755,35 @@ const html = `<!DOCTYPE html>
 
 </div>
 
+<script>
+// ── Auth ─────────────────────────────────────────────────────────────────────
+(function() {
+  if (sessionStorage.getItem('tm_auth') === '1') {
+    document.getElementById('login-overlay').style.display = 'none';
+    return;
+  }
+  // Hide app until authenticated
+  document.getElementById('topbar').style.visibility = 'hidden';
+  document.getElementById('body').style.visibility   = 'hidden';
+})();
+
+function doLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (u === 'adsk' && p === 'buildanything') {
+    sessionStorage.setItem('tm_auth', '1');
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('topbar').style.visibility = '';
+    document.getElementById('body').style.visibility   = '';
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+  }
+  return false;
+}
+</script>
 <script>
 const TESTS    = ${testsJson};
 const PROJECTS = ${projectsJson};
