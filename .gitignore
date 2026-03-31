@@ -1,0 +1,35 @@
+# Auth / secrets — never commit these
+session.json
+.env
+*.env
+
+# Node
+node_modules/
+package-lock.json
+
+# Raw test data (already embedded in viewer.html)
+tests/
+tests_with_steps/
+Steps_Screenshots/
+bdd/
+RFIs_Notifications/
+Meetings_Regressions/
+Correspondence_Regression/
+Schedule_Regression/
+Schedule_WorkPlan_Regression/
+Schedule_Notifications/
+Schedule_WorkPlan_Sanity/
+WebPlatform/
+
+# Old/legacy scripts
+download-playwright-exports.js
+download-tests.js
+export-metadata.js
+generate-viewer-notifications.js
+run.js
+take-screenshots.js
+tests_list.json
+tests_metadata.json
+
+# macOS
+.DS_Store
