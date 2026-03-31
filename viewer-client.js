@@ -455,7 +455,17 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 // ── Search & filters ─────────────────────────────────────────────────────────
-document.getElementById('search').addEventListener('input', renderList);
+function clearSearch() {
+  document.getElementById('search').value = '';
+  document.getElementById('search-clear').classList.remove('visible');
+  renderList();
+}
+window.clearSearch = clearSearch;
+
+document.getElementById('search').addEventListener('input', function () {
+  document.getElementById('search-clear').classList.toggle('visible', this.value.length > 0);
+  renderList();
+});
 
 // ── Keyboard nav ─────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {

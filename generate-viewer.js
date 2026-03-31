@@ -385,6 +385,14 @@ const html = `<!DOCTYPE html>
   }
   #search:focus { border-color: var(--orange); background: var(--white); }
   #search::placeholder { color: var(--muted2); }
+  #search-clear {
+    display: none; position: absolute; right: 22px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; border-radius: 50%; border: none; background: var(--muted2);
+    color: #fff; font-size: 13px; line-height: 1; cursor: pointer; padding: 0;
+    align-items: center; justify-content: center;
+  }
+  #search-clear:hover { background: var(--muted); }
+  #search-clear.visible { display: flex; }
 
   /* Module nav list */
   #module-nav { overflow-y: auto; flex: 1; padding: 6px 0; }
@@ -679,6 +687,7 @@ const html = `<!DOCTYPE html>
     <div id="search-wrap">
       <svg id="search-icon" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search" type="text" placeholder="Search tests..." autocomplete="off">
+      <button id="search-clear" onclick="clearSearch()" title="Clear search">×</button>
     </div>
     <div id="module-nav"></div>
   </div>
