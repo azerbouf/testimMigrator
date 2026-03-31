@@ -212,8 +212,8 @@ function loadFromSource(src) {
     const pngPath  = path.join(src.screenshotsDir, fname.replace('.ts', '.png'));
     const jsonPath = path.join(src.stepsDir, fname.replace('.ts', '.json'));
     const meta     = fs.existsSync(jsonPath) ? JSON.parse(fs.readFileSync(jsonPath)) : {};
-    // Screenshots are served as separate files (screenshots/<fname>.png)
-    const screenshot = fs.existsSync(pngPath) ? `screenshots/${fname.replace('.ts','.png')}` : null;
+    const screenshot = fs.existsSync(pngPath)
+      ? 'data:image/png;base64,' + fs.readFileSync(pngPath).toString('base64') : null;
     const isStub  = code.includes('open URL manually') || code.includes('implement based on steps');
     const hasCode = code.includes('use strict') || code.includes("import { test");
 
