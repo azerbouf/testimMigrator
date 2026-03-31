@@ -587,6 +587,12 @@ const html = `<!DOCTYPE html>
 
   /* Project switcher dropdown kept */
 
+  #footer {
+    text-align: center; padding: 6px; font-size: 11px; color: var(--muted2);
+    background: var(--white); border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  #footer strong { color: var(--muted); font-weight: 600; }
+
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
@@ -740,6 +746,8 @@ const html = `<!DOCTYPE html>
   </div>
 
 </div>
+
+<div id="footer">Built by <strong>Evgeny Averboukh</strong> · Testim → Playwright Migration Tool</div>
 
 <script>
 // ── Auth ─────────────────────────────────────────────────────────────────────
