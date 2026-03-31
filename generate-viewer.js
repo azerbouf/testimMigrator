@@ -291,7 +291,8 @@ const html = `<!DOCTYPE html>
     --text:     #111827;
     --muted:    #6b7280;
     --muted2:   #9ca3af;
-    --sidebar:  440px;
+    --sidebar:  240px;
+    --list-w:   360px;
     --header:   60px;
   }
 
@@ -362,7 +363,7 @@ const html = `<!DOCTYPE html>
   /* ── BODY ── */
   #body { flex: 1; display: flex; overflow: hidden; padding: 20px; gap: 16px; }
 
-  /* ── SIDEBAR CARD ── */
+  /* ── SIDEBAR (module nav) ── */
   #sidebar {
     width: var(--sidebar); min-width: var(--sidebar);
     background: var(--white); border-radius: 14px; border: 1px solid var(--border);
@@ -370,55 +371,84 @@ const html = `<!DOCTYPE html>
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
   #explorer-header {
-    padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
   }
   #explorer-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-  #select-all { font-size: 13px; font-weight: 600; color: var(--orange); cursor: pointer; }
-  #select-all:hover { color: var(--orange2); }
 
   #search-wrap { padding: 10px 12px; border-bottom: 1px solid var(--border); position: relative; }
   #search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; stroke: var(--muted2); fill: none; }
   #search {
     width: 100%; border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 10px 8px 34px; font-size: 15px; color: var(--text);
+    padding: 8px 10px 8px 34px; font-size: 14px; color: var(--text);
     background: var(--bg); outline: none; transition: border-color .15s;
   }
   #search:focus { border-color: var(--orange); background: var(--white); }
   #search::placeholder { color: var(--muted2); }
 
-  #filter-bar { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
-  .filter-chip {
-    font-size: 13px; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--muted); cursor: pointer; font-weight: 500; transition: all .15s;
-    display: flex; align-items: center; gap: 5px;
+  /* Module nav list */
+  #module-nav { overflow-y: auto; flex: 1; padding: 6px 0; }
+  .mnav-separator { height: 1px; background: var(--border); margin: 6px 12px; }
+  .module-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; margin: 1px 8px; border-radius: 9px;
+    cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text);
+    transition: background .12s; user-select: none;
   }
-  .filter-chip svg { width: 13px; height: 13px; stroke: currentColor; fill: none; flex-shrink: 0; }
-  .filter-chip:hover { border-color: var(--orange); color: var(--orange); }
-  .filter-chip.active { background: #fff7ed; border-color: var(--orange); color: var(--orange); }
-  #clear-filters-btn:hover { background: #fee2e2 !important; border-color: #dc2626 !important; }
+  .module-nav-item:hover { background: var(--bg); }
+  .module-nav-item.active { color: #fff; }
+  .module-nav-item.active .mnav-count { color: rgba(255,255,255,.65); }
+  .mnav-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .mnav-name { flex: 1; }
+  .mnav-count { font-size: 13px; color: var(--muted2); font-weight: 400; }
+
+  /* ── LIST PANEL ── */
+  #list-panel {
+    width: var(--list-w); min-width: var(--list-w);
+    background: var(--white); border-radius: 14px; border: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  #list-panel-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  #list-panel-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+  #list-count-badge {
+    font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+    background: var(--bg); color: var(--muted2);
+  }
+  #list { overflow-y: auto; flex: 1; }
 
   #stats { display: none; }
 
-  #list { overflow-y: auto; flex: 1; }
+  /* Label groups */
+  .label-group { }
+  .label-group-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px 7px; font-size: 12px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .05em;
+    border-bottom: 1px solid var(--border); background: #fafafa;
+    position: sticky; top: 0; z-index: 1;
+  }
+  .label-group-header svg { width: 14px; height: 14px; stroke: var(--muted2); fill: none; flex-shrink: 0; }
+  .lgroup-count {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    background: var(--bg); color: var(--muted2); border-radius: 8px; padding: 1px 7px;
+  }
+
+  /* Test items */
   .test-item {
-    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    padding: 11px 14px; border-bottom: 1px solid var(--border);
     cursor: pointer; transition: background .1s; display: flex; align-items: flex-start; gap: 10px;
   }
   .test-item:hover  { background: #fafafa; }
-  .test-item.active { background: #fff7ed; border-left: 3px solid var(--orange); }
-  .test-item .info  { flex: 1; min-width: 0; }
-  .test-item .tname { font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--text); }
-  .test-item .tdesc { font-size: 12px; color: var(--muted2); margin-top: 2px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px; }
-  .test-item .tags  { margin-top: 5px; display: flex; gap: 4px; flex-wrap: wrap; }
-  .test-item .arrow { color: var(--muted2); font-size: 16px; padding-top: 2px; flex-shrink: 0; }
-  .module-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
-  .label-tag {
-    font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 5px;
-    background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;
-    cursor: pointer; text-transform: uppercase; letter-spacing: .03em; transition: all .15s;
-  }
-  .label-tag:hover { background: #fff7ed; border-color: var(--orange); color: var(--orange); }
+  .test-item.active { background: #fff7ed; border-left: 3px solid var(--orange); padding-left: 11px; }
+  .titem-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .titem-info { flex: 1; min-width: 0; }
+  .titem-name { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); }
+  .titem-desc { font-size: 12px; color: var(--muted2); margin-top: 2px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .titem-arrow { color: var(--muted2); font-size: 18px; flex-shrink: 0; margin-top: 1px; line-height: 1; }
 
   /* ── MAIN CARD ── */
   #main {
@@ -547,49 +577,7 @@ const html = `<!DOCTYPE html>
   .badge-pass { background: #dcfce7; color: #16a34a; }
   .badge-fail { background: #fee2e2; color: #dc2626; }
 
-  #label-filter-wrap { position: relative; }
-  #label-menu {
-    display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 100;
-    background: var(--white); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.13); width: 260px; overflow: hidden;
-  }
-  #label-menu.open { display: block; }
-  #module-filter-wrap { position: relative; }
-  #module-menu {
-    display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 100;
-    background: var(--white); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.13); width: 220px; overflow: hidden;
-  }
-  #module-menu.open { display: block; }
-  .module-option {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; cursor: pointer; font-size: 14px; color: var(--text);
-    transition: background .1s; justify-content: space-between;
-  }
-  .module-option:hover { background: var(--bg); }
-  .module-option.selected { background: #fff7ed; }
-  .module-option-left { display: flex; align-items: center; gap: 8px; }
-  .mpip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .mcount { font-size: 12px; color: var(--muted2); }
-
-  #label-search-wrap {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--white);
-  }
-  #label-search-wrap svg { flex-shrink: 0; }
-  #label-search {
-    flex: 1; border: none; outline: none; background: transparent;
-    font-size: 15px; color: var(--text); font-weight: 400;
-  }
-  #label-search::placeholder { color: var(--muted); opacity: 1; }
-  #label-list { max-height: 260px; overflow-y: auto; }
-  .label-option {
-    padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--text);
-    transition: background .1s; display: flex; align-items: center; justify-content: space-between;
-  }
-  .label-option:hover { background: #fff7ed; color: var(--orange); }
-  .label-option.selected { background: #fff7ed; color: var(--orange); font-weight: 600; }
-  .label-option .lcount { font-size: 12px; color: var(--muted2); min-width: 24px; text-align: right; }
+  /* Project switcher dropdown kept */
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -664,7 +652,7 @@ const html = `<!DOCTYPE html>
 <!-- BODY -->
 <div id="body">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR: module navigation -->
   <div id="sidebar">
     <div id="explorer-header">
       <span id="explorer-title">Test Explorer</span>
@@ -673,41 +661,20 @@ const html = `<!DOCTYPE html>
       <svg id="search-icon" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search" type="text" placeholder="Search tests..." autocomplete="off">
     </div>
-    <!-- Filters -->
-    <div id="filter-bar">
-      <!-- Module dropdown -->
-      <div id="module-filter-wrap">
-        <button id="module-filter-btn" class="filter-chip" onclick="toggleModuleMenu()">
-          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span id="module-filter-text">Module</span>
-        </button>
-        <div id="module-menu"><div id="module-list"></div></div>
-      </div>
-      <!-- Label dropdown -->
-      <div id="label-filter-wrap">
-        <button id="label-filter-btn" class="filter-chip" onclick="toggleLabelMenu()">
-          <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          <span id="label-filter-text">Filter by label</span>
-        </button>
-        <div id="label-menu">
-          <div id="label-search-wrap">
-            <svg viewBox="0 0 24 24" stroke-width="2" style="width:17px;height:17px;stroke:#6b7280;fill:none;flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="label-search" placeholder="Search labels..." autocomplete="off">
-          </div>
-          <div id="label-list"></div>
-        </div>
-      </div>
-      <!-- Clear -->
-      <button id="clear-filters-btn" class="filter-chip" style="display:none;border-color:#dc2626;color:#dc2626;" onclick="clearAllFilters()">
-        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        Clear
-      </button>
-    </div>
-    <div id="stats"></div>
-    <div id="list"><div id="list-inner" style="position:relative;"></div></div>
+    <div id="module-nav"></div>
   </div>
 
-  <!-- MAIN -->
+  <!-- LIST PANEL: grouped test list -->
+  <div id="list-panel">
+    <div id="list-panel-header">
+      <span id="list-panel-title">All Tests</span>
+      <span id="list-count-badge">0</span>
+    </div>
+    <div id="stats"></div>
+    <div id="list"><div id="list-inner"></div></div>
+  </div>
+
+  <!-- MAIN: test detail -->
   <div id="main">
     <div id="empty-state">
       <div id="empty-icon">

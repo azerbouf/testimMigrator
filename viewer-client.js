@@ -111,57 +111,29 @@ function highlightCode(code) {
 // ── State ───────────────────────────────────────────────────────────────────
 let activeProject = 'autodesk-build';
 let filtered = [...TESTS];
-let activeLabel  = null;
 let activeModule = null;
 let activeIdx    = null;
 
 // Project-specific derived data (rebuilt when project switches)
-let projectTests  = TESTS.filter(t => t.project === activeProject);
-let labelCounts   = {};
-let allLabels     = [];
-let moduleCounts  = {};
-let allModules    = [];
+let projectTests = TESTS.filter(t => t.project === activeProject);
+let moduleCounts = {};
+let allModules   = [];
 
 function rebuildProjectData() {
   projectTests = TESTS.filter(t => t.project === activeProject);
-  labelCounts  = {};
-  projectTests.forEach(t => t.labels.forEach(l => { labelCounts[l] = (labelCounts[l] || 0) + 1; }));
-  allLabels    = Object.keys(labelCounts).sort();
   moduleCounts = {};
   projectTests.forEach(t => { const m = t.module || 'Other'; moduleCounts[m] = (moduleCounts[m] || 0) + 1; });
   allModules   = Object.keys(moduleCounts).sort();
 }
 rebuildProjectData();
 
-function updateClearBtn() {
-  const hasFilter = activeModule || activeLabel;
-  document.getElementById('clear-filters-btn').style.display = hasFilter ? 'flex' : 'none';
-}
-
-function clearAllFilters() {
-  activeModule = null;
-  activeLabel  = null;
-  document.getElementById('search').value = '';
-  document.getElementById('label-filter-text').textContent = 'Filter by label';
-  document.getElementById('label-filter-btn').classList.remove('active');
-  document.getElementById('module-filter-text').textContent = 'Module';
-  document.getElementById('module-filter-btn').classList.remove('active');
-  document.getElementById('label-menu').classList.remove('open');
-  document.getElementById('module-menu').classList.remove('open');
-  renderModuleMenu();
-  renderLabelMenu();
-  updateClearBtn();
-  renderList();
-}
-
 // expose for HTML onclick
 window.toggleProjectMenu = toggleProjectMenu;
-window.toggleModuleMenu  = toggleModuleMenu;
-window.toggleLabelMenu   = toggleLabelMenu;
-window.clearAllFilters   = clearAllFilters;
 
 
-// ── Module colors ────────────────────────────────────────────────────────────
+// ── Colors ───────────────────────────────────────────────────────────────────
+const PROJECT_COLORS = { 'autodesk-build': '#f97316', 'web-platform': '#3b82f6' };
+
 const MODULE_COLORS = {
   RFIs:            '#f97316',
   Meetings:        '#7c3aed',
@@ -171,98 +143,51 @@ const MODULE_COLORS = {
   Other:           '#6b7280',
 };
 
-// ── Module dropdown ──────────────────────────────────────────────────────────
-function renderModuleMenu() {
-  document.getElementById('module-list').innerHTML = allModules.map(m => {
-    const color = MODULE_COLORS[m] || '#6b7280';
-    return `<div class="module-option${activeModule === m ? ' selected' : ''}" data-module="${m}">
-      <span class="module-option-left">
-        <span class="mpip" style="background:${color};"></span>
-        <span style="color:${color};font-weight:600;">${m}</span>
-      </span>
-      <span class="mcount">${moduleCounts[m]}</span>
+// ── Module nav ───────────────────────────────────────────────────────────────
+function renderModuleNav() {
+  const nav = document.getElementById('module-nav');
+  const allCount = projectTests.length;
+  const proj = PROJECTS.find(p => p.id === activeProject);
+  const projColor = PROJECT_COLORS[activeProject] || '#f97316';
+
+  const items = [
+    { module: null, label: 'All', count: allCount, color: '#9ca3af' },
+    ...allModules.map(m => ({ module: m, label: m, count: moduleCounts[m], color: MODULE_COLORS[m] || '#6b7280' })),
+  ];
+
+  // Insert separator before "Other" if present
+  let html = '';
+  items.forEach((item, i) => {
+    if (item.module === 'Other' && i > 1) html += '<div class="mnav-separator"></div>';
+    const isActive = activeModule === item.module;
+    const bg = isActive ? item.module ? (MODULE_COLORS[item.module] || projColor) : projColor : '';
+    html += `<div class="module-nav-item${isActive ? ' active' : ''}" data-module="${item.module || ''}" style="${bg ? `background:${bg};` : ''}">
+      <span class="mnav-dot" style="background:${isActive ? 'rgba(255,255,255,.85)' : item.color};"></span>
+      <span class="mnav-name">${item.label}</span>
+      <span class="mnav-count">${item.count}</span>
     </div>`;
-  }).join('');
-  document.querySelectorAll('.module-option').forEach(el => {
+  });
+  nav.innerHTML = html;
+
+  nav.querySelectorAll('.module-nav-item').forEach(el => {
     el.addEventListener('click', () => {
-      activeModule = activeModule === el.dataset.module ? null : el.dataset.module;
-      const txt = document.getElementById('module-filter-text');
-      txt.textContent = activeModule || 'Module';
-      document.getElementById('module-filter-btn').classList.toggle('active', !!activeModule);
-      if (activeModule) {
-        activeLabel = null;
-        document.getElementById('label-filter-text').textContent = 'Filter by label';
-        document.getElementById('label-filter-btn').classList.remove('active');
-        document.getElementById('label-menu').classList.remove('open');
-      }
-      toggleModuleMenu();
-      renderModuleMenu();
-      renderLabelMenu();
-      updateClearBtn();
+      activeModule = el.dataset.module || null;
+      activeIdx = null;
+      document.getElementById('detail').style.display = 'none';
+      document.getElementById('empty-state').style.display = '';
+      renderModuleNav();
       renderList();
     });
   });
 }
-renderModuleMenu();
-
-function toggleModuleMenu() {
-  document.getElementById('module-menu').classList.toggle('open');
-  document.getElementById('label-menu').classList.remove('open');
-}
-
-// ── Label dropdown ───────────────────────────────────────────────────────────
-function renderLabelMenu(q = '') {
-  const lq = q.toLowerCase();
-  // Scope labels to active module (or all project tests if no module selected)
-  const scopeTests = activeModule
-    ? projectTests.filter(t => t.module === activeModule)
-    : projectTests;
-  const scopedCounts = {};
-  scopeTests.forEach(t => t.labels.forEach(l => { scopedCounts[l] = (scopedCounts[l] || 0) + 1; }));
-  const items = Object.keys(scopedCounts).sort()
-    .filter(l => !lq || l.toLowerCase().includes(lq));
-
-  document.getElementById('label-list').innerHTML = items.map(l =>
-    `<div class="label-option${activeLabel===l?' selected':''}" data-label="${l}">
-      <span>${l}</span><span class="lcount">${scopedCounts[l]}</span>
-    </div>`
-  ).join('');
-  document.querySelectorAll('.label-option').forEach(el => {
-    el.addEventListener('click', () => {
-      activeLabel = activeLabel === el.dataset.label ? null : el.dataset.label;
-      document.getElementById('label-filter-text').textContent = activeLabel || 'Filter by label';
-      document.getElementById('label-filter-btn').classList.toggle('active', !!activeLabel);
-      if (activeLabel) {
-        document.getElementById('module-menu').classList.remove('open');
-      }
-      toggleLabelMenu();
-      renderLabelMenu();
-      updateClearBtn();
-      renderList();
-    });
-  });
-}
-renderLabelMenu();
-
-document.getElementById('label-search').addEventListener('input', e => renderLabelMenu(e.target.value));
-
-function toggleLabelMenu() {
-  document.getElementById('label-menu').classList.toggle('open');
-  document.getElementById('module-menu').classList.remove('open');
-}
+renderModuleNav();
 
 document.addEventListener('click', e => {
-  if (!document.getElementById('label-filter-wrap').contains(e.target))
-    document.getElementById('label-menu').classList.remove('open');
-  if (!document.getElementById('module-filter-wrap').contains(e.target))
-    document.getElementById('module-menu').classList.remove('open');
   if (!document.getElementById('project-wrap').contains(e.target))
     document.getElementById('project-menu').classList.remove('open');
 });
 
 // ── Project switcher ─────────────────────────────────────────────────────────
-const PROJECT_COLORS = { 'autodesk-build': '#f97316', 'web-platform': '#3b82f6' };
-
 function renderProjectMenu() {
   const counts = {};
   PROJECTS.forEach(p => { counts[p.id] = TESTS.filter(t => t.project === p.id).length; });
@@ -285,15 +210,12 @@ function renderProjectMenu() {
       document.getElementById('project-btn-text').textContent = proj ? proj.name : activeProject;
       document.getElementById('project-btn').querySelector('.pb-dot').style.background =
         PROJECT_COLORS[activeProject] || '#6b7280';
-      activeLabel  = null;
       activeModule = null;
       document.getElementById('search').value = '';
       rebuildProjectData();
-      renderModuleMenu();
-      renderLabelMenu();
-      updateClearBtn();
       toggleProjectMenu();
       renderProjectMenu();
+      renderModuleNav();
       activeIdx = null;
       document.getElementById('detail').style.display = 'none';
       document.getElementById('empty-state').style.display = '';
@@ -308,29 +230,53 @@ function toggleProjectMenu() {
 }
 
 // ── Render list ──────────────────────────────────────────────────────────────
+const FOLDER_ICON = '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" width="14" height="14"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>';
+
 function renderList() {
   const q = document.getElementById('search').value.toLowerCase();
   filtered = projectTests.filter(t => {
-    if (!(!q || t.name.toLowerCase().includes(q) || t.labels.join(' ').toLowerCase().includes(q))) return false;
+    if (q && !t.name.toLowerCase().includes(q) && !t.labels.join(' ').toLowerCase().includes(q)) return false;
     if (activeModule && t.module !== activeModule) return false;
-    if (activeLabel  && !t.labels.includes(activeLabel)) return false;
     return true;
   });
 
-  document.getElementById('stats').textContent = '';
-  document.getElementById('stats-pill').textContent = '';
+  // Update list panel header
+  document.getElementById('list-panel-title').textContent = activeModule || 'All Tests';
+  document.getElementById('list-count-badge').textContent = filtered.length;
+
+  // Group by first label
+  const groups = {};
+  const groupOrder = [];
+  filtered.forEach(t => {
+    const label = t.labels[0] || 'Other';
+    if (!groups[label]) { groups[label] = []; groupOrder.push(label); }
+    groups[label].push(t);
+  });
+
+  let html = '';
+  groupOrder.forEach(label => {
+    const items = groups[label];
+    html += `<div class="label-group">
+      <div class="label-group-header">${FOLDER_ICON}${label}<span class="lgroup-count">${items.length}</span></div>
+      ${items.map(t => {
+        const globalIdx = filtered.indexOf(t);
+        const modColor = MODULE_COLORS[t.module] || '#9ca3af';
+        const desc = t.description ? `<div class="titem-desc">${t.description}</div>` : '';
+        return `<div class="test-item" data-idx="${globalIdx}">
+          <div class="titem-dot" style="background:${modColor}"></div>
+          <div class="titem-info"><div class="titem-name">${t.name}</div>${desc}</div>
+          <div class="titem-arrow">›</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+
+  if (!html) {
+    html = '<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px;">No tests match your search.</div>';
+  }
 
   const inner = document.getElementById('list-inner');
-  inner.innerHTML = filtered.map((t, i) => {
-    const modColor = MODULE_COLORS[t.module] || '#9ca3af';
-    const desc = t.description ? `<div class="tdesc">${t.description}</div>` : '';
-    return `<div class="test-item" data-idx="${i}">
-      <div class="module-dot" style="background:${modColor}" title="${t.module || 'Other'}"></div>
-      <div class="info"><div class="tname">${t.name}</div>${desc}</div>
-      <div class="arrow">›</div>
-    </div>`;
-  }).join('');
-
+  inner.innerHTML = html;
   inner.querySelectorAll('.test-item').forEach(el => {
     el.addEventListener('click', () => selectTest(+el.dataset.idx));
   });
@@ -341,8 +287,8 @@ function selectTest(idx) {
   activeIdx = idx;
   const t = filtered[idx];
 
-  document.querySelectorAll('.test-item').forEach((el, i) => {
-    el.classList.toggle('active', i === idx);
+  document.querySelectorAll('.test-item').forEach(el => {
+    el.classList.toggle('active', +el.dataset.idx === idx);
   });
 
   document.getElementById('empty-state').style.display = 'none';
