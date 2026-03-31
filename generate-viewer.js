@@ -9,8 +9,10 @@
 const fs   = require('fs');
 const path = require('path');
 
-const OUT_FILE    = path.join(__dirname, 'viewer.html');
-const CLIENT_JS   = fs.readFileSync(path.join(__dirname, 'viewer-client.js'), 'utf8');
+const OUT_FILE        = path.join(__dirname, 'viewer.html');
+const CLIENT_JS       = fs.readFileSync(path.join(__dirname, 'viewer-client.js'), 'utf8');
+const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
+if (!fs.existsSync(SCREENSHOTS_DIR)) fs.mkdirSync(SCREENSHOTS_DIR);
 
 // ── Project definitions ───────────────────────────────────────────────────────
 const PROJECTS = [
@@ -212,8 +214,13 @@ function loadFromSource(src) {
     const pngPath  = path.join(src.screenshotsDir, fname.replace('.ts', '.png'));
     const jsonPath = path.join(src.stepsDir, fname.replace('.ts', '.json'));
     const meta     = fs.existsSync(jsonPath) ? JSON.parse(fs.readFileSync(jsonPath)) : {};
-    const screenshot = fs.existsSync(pngPath)
-      ? 'data:image/png;base64,' + fs.readFileSync(pngPath).toString('base64') : null;
+    // Copy screenshot to screenshots/<testId>.png (safe alphanumeric filename)
+    let screenshot = null;
+    if (fs.existsSync(pngPath) && meta.id) {
+      const dest = path.join(SCREENSHOTS_DIR, meta.id + '.png');
+      if (!fs.existsSync(dest)) fs.copyFileSync(pngPath, dest);
+      screenshot = 'screenshots/' + meta.id + '.png';
+    }
     const isStub  = code.includes('open URL manually') || code.includes('implement based on steps');
     const hasCode = code.includes('use strict') || code.includes("import { test");
 
@@ -266,6 +273,7 @@ const html = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Testim Migrator — Playwright Bridge</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23f97316'/><text x='16' y='23' font-size='20' font-family='system-ui,sans-serif' font-weight='700' text-anchor='middle' fill='white'>T</text></svg>">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
