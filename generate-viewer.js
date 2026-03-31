@@ -624,6 +624,25 @@ const html = `<!DOCTYPE html>
 </head>
 <body>
 
+<!-- LOGIN OVERLAY — first in DOM so it covers everything immediately on parse -->
+<div id="login-overlay">
+  <div id="login-card">
+    <div id="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div>
+      <div id="login-title">Testim Migrator</div>
+      <div id="login-sub">Playwright Bridge</div>
+    </div>
+    <form id="login-form" onsubmit="return doLogin(event)">
+      <input class="login-field" id="login-user" type="text" placeholder="Username" autocomplete="username" autofocus>
+      <input class="login-field" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <div id="login-error">Incorrect username or password.</div>
+      <button id="login-btn" type="submit">Sign in</button>
+    </form>
+  </div>
+</div>
+
 <!-- TOP HEADER -->
 <div id="topbar">
   <div id="logo">
@@ -715,12 +734,9 @@ const html = `<!DOCTYPE html>
 
 <script>
 // ── Auth ─────────────────────────────────────────────────────────────────────
-// The overlay is the last element in <body> so it naturally covers everything.
-// Just hide it if already authenticated.
+// Overlay is the first element in <body> — hide it immediately if already authenticated.
 if (sessionStorage.getItem('tm_auth') === '1') {
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('login-overlay').style.display = 'none';
-  });
+  document.getElementById('login-overlay').style.display = 'none';
 }
 
 function doLogin(e) {
@@ -744,24 +760,6 @@ const PROJECTS = ${projectsJson};
 ${CLIENT_JS}
 </script>
 
-<!-- LOGIN OVERLAY — last in DOM so it paints on top of everything -->
-<div id="login-overlay">
-  <div id="login-card">
-    <div id="login-logo">
-      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-    </div>
-    <div>
-      <div id="login-title">Testim Migrator</div>
-      <div id="login-sub">Playwright Bridge</div>
-    </div>
-    <form id="login-form" onsubmit="return doLogin(event)">
-      <input class="login-field" id="login-user" type="text" placeholder="Username" autocomplete="username" autofocus>
-      <input class="login-field" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
-      <div id="login-error">Incorrect username or password.</div>
-      <button id="login-btn" type="submit">Sign in</button>
-    </form>
-  </div>
-</div>
 </body>
 </html>`;
 
