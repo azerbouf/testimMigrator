@@ -212,8 +212,8 @@ function loadFromSource(src) {
     const pngPath  = path.join(src.screenshotsDir, fname.replace('.ts', '.png'));
     const jsonPath = path.join(src.stepsDir, fname.replace('.ts', '.json'));
     const meta     = fs.existsSync(jsonPath) ? JSON.parse(fs.readFileSync(jsonPath)) : {};
-    const screenshot = fs.existsSync(pngPath)
-      ? 'data:image/png;base64,' + fs.readFileSync(pngPath).toString('base64') : null;
+    // Screenshots are served as separate files (screenshots/<fname>.png)
+    const screenshot = fs.existsSync(pngPath) ? `screenshots/${fname.replace('.ts','.png')}` : null;
     const isStub  = code.includes('open URL manually') || code.includes('implement based on steps');
     const hasCode = code.includes('use strict') || code.includes("import { test");
 
@@ -763,8 +763,8 @@ const html = `<!DOCTYPE html>
     return;
   }
   // Hide app until authenticated
-  document.getElementById('topbar').style.visibility = 'hidden';
-  document.getElementById('body').style.visibility   = 'hidden';
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('body').style.display   = 'none';
 })();
 
 function doLogin(e) {
@@ -774,8 +774,8 @@ function doLogin(e) {
   if (u === 'adsk' && p === 'buildanything') {
     sessionStorage.setItem('tm_auth', '1');
     document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('topbar').style.visibility = '';
-    document.getElementById('body').style.visibility   = '';
+    document.getElementById('topbar').style.display = '';
+    document.getElementById('body').style.display   = '';
   } else {
     document.getElementById('login-error').style.display = 'block';
     document.getElementById('login-pass').value = '';

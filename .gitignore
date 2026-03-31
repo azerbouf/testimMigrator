@@ -7,7 +7,9 @@ session.json
 node_modules/
 package-lock.json
 
-# Raw test data (already embedded in viewer.html)
+# Screenshots are tracked separately in screenshots/ folder
+
+# Raw test data (not needed — screenshots are in screenshots/)
 tests/
 tests_with_steps/
 Steps_Screenshots/
