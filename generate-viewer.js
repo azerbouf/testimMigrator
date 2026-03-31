@@ -602,7 +602,7 @@ const html = `<!DOCTYPE html>
   }
   #login-logo svg { width: 28px; height: 28px; fill: white; }
   #login-title { font-size: 22px; font-weight: 700; color: #f1f5f9; text-align: center; line-height: 1.3; }
-  #login-sub { font-size: 14px; color: #64748b; text-align: center; margin-top: -16px; }
+  #login-sub { font-size: 14px; color: #64748b; text-align: center; margin-top: 4px; }
   #login-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
   .login-field {
     width: 100%; padding: 12px 16px; border-radius: 10px;
