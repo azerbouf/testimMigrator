@@ -167,6 +167,7 @@ const MODULE_COLORS = {
   Meetings:        '#7c3aed',
   Correspondence:  '#0ea5e9',
   Schedule:        '#10b981',
+  Submittals:      '#06b6d4',
   Other:           '#6b7280',
 };
 
@@ -310,8 +311,7 @@ function toggleProjectMenu() {
 function renderList() {
   const q = document.getElementById('search').value.toLowerCase();
   filtered = projectTests.filter(t => {
-    const matchSearch = !q || t.name.toLowerCase().includes(q) || t.labels.join(' ').toLowerCase().includes(q);
-    if (!matchSearch) return false;
+    if (!(!q || t.name.toLowerCase().includes(q) || t.labels.join(' ').toLowerCase().includes(q))) return false;
     if (activeModule && t.module !== activeModule) return false;
     if (activeLabel  && !t.labels.includes(activeLabel)) return false;
     return true;
@@ -320,24 +320,20 @@ function renderList() {
   document.getElementById('stats').textContent = '';
   document.getElementById('stats-pill').textContent = '';
 
-  const list = document.getElementById('list');
-  list.innerHTML = filtered.map((t, i) => {
+  const inner = document.getElementById('list-inner');
+  inner.innerHTML = filtered.map((t, i) => {
     const modColor = MODULE_COLORS[t.module] || '#9ca3af';
     const desc = t.description ? `<div class="tdesc">${t.description}</div>` : '';
     return `<div class="test-item" data-idx="${i}">
       <div class="module-dot" style="background:${modColor}" title="${t.module || 'Other'}"></div>
-      <div class="info">
-        <div class="tname">${t.name}</div>
-        ${desc}
-      </div>
+      <div class="info"><div class="tname">${t.name}</div>${desc}</div>
       <div class="arrow">›</div>
     </div>`;
   }).join('');
 
-  list.querySelectorAll('.test-item').forEach(el => {
+  inner.querySelectorAll('.test-item').forEach(el => {
     el.addEventListener('click', () => selectTest(+el.dataset.idx));
   });
-
 }
 
 // ── Select test ──────────────────────────────────────────────────────────────

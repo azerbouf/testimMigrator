@@ -31,6 +31,7 @@ const LABEL_MODULE_AB = {
   Schedule_WorkPlan_Regression:  'Schedule',
   Schedule_Notifications:        'Schedule',
   Schedule_WorkPlan_Sanity:      'Schedule',
+  sbmtls_exp:                    'Submittals',
 };
 
 function moduleFromLabels(labels, projectId) {
@@ -80,6 +81,7 @@ const AB_SOURCES = [
   sourceDir('Schedule_WorkPlan_Regression', 'autodesk-build'),
   sourceDir('Schedule_Notifications',       'autodesk-build'),
   sourceDir('Schedule_WorkPlan_Sanity',     'autodesk-build'),
+  sourceDir('sbmtls_exp',                   'autodesk-build'),
 ].filter(s => fs.existsSync(s.testsDir));
 
 // ── Web Platform sources (label subdirs under WebPlatform/) ──────────────────
@@ -702,7 +704,7 @@ const html = `<!DOCTYPE html>
       </button>
     </div>
     <div id="stats"></div>
-    <div id="list"></div>
+    <div id="list"><div id="list-inner" style="position:relative;"></div></div>
   </div>
 
   <!-- MAIN -->
